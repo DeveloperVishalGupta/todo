@@ -1,5 +1,14 @@
-import "@/styles/globals.css";
 
-export default function App({ Component, pageProps }) {
-  return <Component {...pageProps} />;
+import '@/styles/globals.css'
+import { NextUIProvider } from '@nextui-org/react';
+
+function MyApp({ Component, pageProps }) {
+  const renderWithLayout = Component.getLayout || ((page) => page);
+  return (
+    <NextUIProvider>
+      {renderWithLayout(<Component {...pageProps} />)}
+    </NextUIProvider>
+  );
 }
+
+export default MyApp;

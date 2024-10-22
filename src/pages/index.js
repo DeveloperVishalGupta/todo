@@ -1,115 +1,229 @@
-import Image from "next/image";
-import localFont from "next/font/local";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+import Image from "next/image";
+import { useState } from "react";
+import Icons from "@/model/enum/icons";
+import celebrities from '@/celebrities.json';
+import Modal from "@/components/model";
+
 
 export default function Home() {
-  return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/pages/index.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const defaultContent = "Lorem ipsum dolor sit amet, consectetur adipiscing elit...";
+  const [initialCelebritiesData] = useState(celebrities);
+  const [seachBox, setSearchBox] = useState(null)
+  const [celebritiesData, setCelebritiesData] = useState(celebrities);
+  const [inputValue, setInputValue] = useState({}); // Object to store dynamic input values for each card
+  const [inputFieldDisable, setInputFieldDisable] = useState({}); // Object to track disabled state for each card
+  const [cardOpen, setCardOpen] = useState({}); // Object to track open/close state for each card
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility state
+  const [selectedItem, setSelectedItem] = useState(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const openModal = (item) => {
+    console.log(item);
+
+    setSelectedItem(item);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedItem(null);
+  };
+  const handleDelete = (id) => {
+    const updatedCelebrities = celebritiesData.filter((celeb) => celeb.id !== id);
+    setCelebritiesData(updatedCelebrities);
+  };
+  // Initialize inputValue and inputFieldDisable for each celebrity
+  const initializeState = (celebrity) => ({
+    [`cardName_${celebrity.id}`]: `${celebrity.first} ${celebrity.last}`,
+    [`age_${celebrity.id}`]: getAge(celebrity.dob),
+    [`gender_${celebrity.id}`]: celebrity.gender,
+    [`country_${celebrity.id}`]: celebrity.country,
+    [`description_${celebrity.id}`]: celebrity.description || defaultContent,
+  });
+
+  // Get age from the date of birth
+  const getAge = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const handleInputChange = (e, id) => {
+    const { name, value } = e.target;
+    setInputValue((prev) => ({
+      ...prev,
+      [`${name}_${id}`]: value,
+    }));
+  };
+
+  const handleSave = (id) => {
+    console.log("Saved value:", inputValue[`cardName_${id}`]);
+    // You can add your API call or local storage logic here
+  };
+
+  const cardEdit = (id) => {
+    setInputFieldDisable((prev) => ({
+      ...prev,
+      [id]: false,
+    }));
+  };
+
+
+  const searchBar = (e) => {
+    const searchText = e.target.value.toLowerCase(); // Convert to lowercase for case-insensitive search
+    console.log(searchText);
+
+    // If the search bar is empty, reset to the full data
+    if (!searchText) {
+      setCelebritiesData(initialCelebritiesData); // Reset to the full data
+    } else {
+      // Filter the data based on the search text
+      const filteredData = initialCelebritiesData.filter(person =>
+        person.first.toLowerCase().startsWith(searchText)
+      );
+      setCelebritiesData(filteredData); // Update state with filtered data
+    }
+  };
+
+  return (
+    <div className="grid justify-items-center p-4">
+      <div className="md:w-1/2 lg:w-5/12 xl:w-1/4">
+        <div className="border rounded-lg flex items-center px-4">
+          <span>
+            {Icons.getComponent(Icons.MAGNIFYING_GLASS)}
+          </span>
+          <input
+            name="seachBox"
+            placeholder="Search.."
+            className={`font-semibold py-2 px-4`}
+            value={seachBox}
+            onChange={(e) => searchBar(e)}
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        {celebritiesData.map((celebrity) => {
+          const id = celebrity.id;
+          if (!inputValue[`cardName_${id}`]) {
+            setInputValue((prev) => ({
+              ...prev,
+              ...initializeState(celebrity),
+            }));
+            setInputFieldDisable((prev) => ({ ...prev, [id]: true }));
+            setCardOpen((prev) => ({ ...prev, [id]: false }));
+          }
+
+
+
+          return (
+            <div key={id} className="border rounded-lg px-4 py-3 my-4">
+              {/* Header */}
+              <div className="flex justify-between items-center" onClick={() => {
+                if (inputFieldDisable[id]) {
+                  setCardOpen((prev) => ({ ...prev, [id]: !prev[id] }));
+                }
+              }}>
+                <div className="flex items-center">
+                  <Image alt={`${celebrity.first} ${celebrity.last}`} src={celebrity.picture} className="rounded-full w-16" width={64} height={64} />
+                  <input
+                    name="cardName"
+                    className={`${!inputFieldDisable[id] && 'border-2 border-slate-300 rounded-lg'} font-semibold w-3/5 ms-2 text-lg capitalize px-4`}
+                    value={inputValue[`cardName_${id}`]}
+                    onChange={(e) => handleInputChange(e, id)}
+                    onBlur={() => handleSave(id)}
+                    disabled={inputFieldDisable[id]}
+                  />
+                </div>
+                <div className={cardOpen[id] ? 'rotate-0' : 'rotate-180'}>
+                  {Icons.getComponent(Icons.UP_ARROW)}
+                </div>
+              </div>
+
+              {/* Body */}
+              {cardOpen[id] && (
+                <>
+                  <div className="grid grid-cols-3 my-6">
+                    <div className="text-start">
+                      <p className="text-slate-400">Age</p>
+                      <input
+                        name="age"
+                        className={`${!inputFieldDisable[id] && 'border-2 border-slate-300 rounded-lg'}`}
+                        value={`${inputValue[`age_${id}`]} years`}
+                        onChange={(e) => handleInputChange(e, id)}
+                        onBlur={() => handleSave(id)}
+                        disabled={inputFieldDisable[id]}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-slate-400">Gender</p>
+                      <input
+                        name="gender"
+                        className={`${!inputFieldDisable[id] && 'border-2 border-slate-300 rounded-lg'}`}
+                        value={inputValue[`gender_${id}`]}
+                        onChange={(e) => handleInputChange(e, id)}
+                        onBlur={() => handleSave(id)}
+                        disabled={inputFieldDisable[id]}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-slate-400">Country</p>
+                      <input
+                        name="country"
+                        className={`${!inputFieldDisable[id] && 'border-2 border-slate-300 rounded-lg'}`}
+                        value={inputValue[`country_${id}`]}
+                        onChange={(e) => handleInputChange(e, id)}
+                        onBlur={() => handleSave(id)}
+                        disabled={inputFieldDisable[id]}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-slate-400">Description</p>
+                    <textarea
+                      name="description"
+                      rows={4}
+                      className={`${!inputFieldDisable[id] && 'border-2 border-slate-300 rounded-lg'} w-full`}
+                      value={inputValue[`description_${id}`]}
+                      onChange={(e) => handleInputChange(e, id)}
+                      onBlur={() => handleSave(id)}
+                      disabled={inputFieldDisable[id]}
+                    />
+                  </div>
+
+                  {inputFieldDisable[id] ? (
+                    <div className="flex justify-end mx-8 my-4">
+                      <span className="px-2 py-2 cursor-pointer" onClick={() => openModal(celebrity)}>
+                        {Icons.getComponent(Icons.TRASH, { color: 'red' })}
+                      </span>
+                      <span className="px-2 py-2 cursor-pointer" onClick={() => cardEdit(id)}>
+                        {Icons.getComponent(Icons.PENCIL, { color: 'blue' })}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex justify-end mx-8 my-4">
+                      <span className="px-2 border py-2 me-2 cursor-pointer">
+                        {Icons.getComponent(Icons.CIRCLE_CHECK)}
+                      </span>
+                      <span className="px-2 border py-2 cursor-pointer" onClick={() => setInputFieldDisable((prev) => ({ ...prev, [id]: true }))}>
+                        {Icons.getComponent(Icons.CIRCLE_XMARK, { color: 'red' })}
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        item={selectedItem}
+        onDelete={handleDelete}
+      />
     </div>
   );
 }
