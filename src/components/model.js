@@ -1,9 +1,8 @@
-// components/Modal.js
 
-import { useState } from 'react';
 
-export default function Modal({ isOpen, onClose, item, onDelete }) {
-    if (!isOpen) return null; // Don't render the modal if it's not open
+
+export function Modal({ isOpen, onClose, item, onDelete }) {
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center">

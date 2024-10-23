@@ -3,14 +3,17 @@ import Image from "next/image";
 import { useState } from "react";
 import Icons from "@/model/enum/icons";
 import celebrities from '@/celebrities.json';
-import Modal from "@/components/model";
+// import Modal from "@/components/model";
+import { Test, Test1, Test2 } from "@/components/test";
+import { Modal } from "@/components/model";
+// import Test from "@/components/test";
 
 
 export default function Home() {
   const defaultContent = "Lorem ipsum dolor sit amet, consectetur adipiscing elit...";
   const [initialCelebritiesData] = useState(celebrities);
-  const [seachBox, setSearchBox] = useState(null)
   const [celebritiesData, setCelebritiesData] = useState(celebrities);
+  const [seachBox, setSearchBox] = useState(null)
   const [inputValue, setInputValue] = useState({}); // Object to store dynamic input values for each card
   const [inputFieldDisable, setInputFieldDisable] = useState({}); // Object to track disabled state for each card
   const [cardOpen, setCardOpen] = useState({}); // Object to track open/close state for each card
@@ -204,11 +207,12 @@ export default function Home() {
                     </div>
                   ) : (
                     <div className="flex justify-end mx-8 my-4">
-                      <span className="px-2 border py-2 me-2 cursor-pointer">
-                        {Icons.getComponent(Icons.CIRCLE_CHECK)}
-                      </span>
-                      <span className="px-2 border py-2 cursor-pointer" onClick={() => setInputFieldDisable((prev) => ({ ...prev, [id]: true }))}>
+
+                      <span className="px-2 py-2 cursor-pointer" >
                         {Icons.getComponent(Icons.CIRCLE_XMARK, { color: 'red' })}
+                      </span>
+                      <span className="px-2 py-2 me-2 cursor-pointer" onClick={() => setInputFieldDisable((prev) => ({ ...prev, [id]: true }))}>
+                        {Icons.getComponent(Icons.CIRCLE_CHECK)}
                       </span>
                     </div>
                   )}
@@ -224,6 +228,9 @@ export default function Home() {
         item={selectedItem}
         onDelete={handleDelete}
       />
+      <Test />
+      <Test1 />
+      <Test2 />
     </div>
   );
 }

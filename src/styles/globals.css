@@ -44,8 +44,8 @@ input{
   background-color: white;
   padding: 0 .5rem;
 }
-input:focus-visible{
-  outline: none;}
+/* input:focus-visible{
+  outline: none;} */
 textarea{
  min-height: 100%;
   background-color: white;
