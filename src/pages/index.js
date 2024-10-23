@@ -3,10 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import Icons from "@/model/enum/icons";
 import celebrities from '@/celebrities.json';
-// import Modal from "@/components/model";
-import { Test, Test1, Test2 } from "@/components/test";
 import { Modal } from "@/components/model";
-// import Test from "@/components/test";
 
 
 export default function Home() {
@@ -14,10 +11,10 @@ export default function Home() {
   const [initialCelebritiesData] = useState(celebrities);
   const [celebritiesData, setCelebritiesData] = useState(celebrities);
   const [seachBox, setSearchBox] = useState(null)
-  const [inputValue, setInputValue] = useState({}); // Object to store dynamic input values for each card
-  const [inputFieldDisable, setInputFieldDisable] = useState({}); // Object to track disabled state for each card
-  const [cardOpen, setCardOpen] = useState({}); // Object to track open/close state for each card
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility state
+  const [inputValue, setInputValue] = useState({});
+  const [inputFieldDisable, setInputFieldDisable] = useState({});
+  const [cardOpen, setCardOpen] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
   const openModal = (item) => {
@@ -35,7 +32,7 @@ export default function Home() {
     const updatedCelebrities = celebritiesData.filter((celeb) => celeb.id !== id);
     setCelebritiesData(updatedCelebrities);
   };
-  // Initialize inputValue and inputFieldDisable for each celebrity
+
   const initializeState = (celebrity) => ({
     [`cardName_${celebrity.id}`]: `${celebrity.first} ${celebrity.last}`,
     [`age_${celebrity.id}`]: getAge(celebrity.dob),
@@ -44,7 +41,7 @@ export default function Home() {
     [`description_${celebrity.id}`]: celebrity.description || defaultContent,
   });
 
-  // Get age from the date of birth
+
   const getAge = (dob) => {
     const birthDate = new Date(dob);
     const today = new Date();
@@ -66,7 +63,6 @@ export default function Home() {
 
   const handleSave = (id) => {
     console.log("Saved value:", inputValue[`cardName_${id}`]);
-    // You can add your API call or local storage logic here
   };
 
   const cardEdit = (id) => {
@@ -78,18 +74,15 @@ export default function Home() {
 
 
   const searchBar = (e) => {
-    const searchText = e.target.value.toLowerCase(); // Convert to lowercase for case-insensitive search
-    console.log(searchText);
+    const searchText = e.target.value.toLowerCase();
 
-    // If the search bar is empty, reset to the full data
     if (!searchText) {
-      setCelebritiesData(initialCelebritiesData); // Reset to the full data
+      setCelebritiesData(initialCelebritiesData);
     } else {
-      // Filter the data based on the search text
       const filteredData = initialCelebritiesData.filter(person =>
         person.first.toLowerCase().startsWith(searchText)
       );
-      setCelebritiesData(filteredData); // Update state with filtered data
+      setCelebritiesData(filteredData);
     }
   };
 
@@ -228,9 +221,6 @@ export default function Home() {
         item={selectedItem}
         onDelete={handleDelete}
       />
-      <Test />
-      <Test1 />
-      <Test2 />
     </div>
   );
 }
